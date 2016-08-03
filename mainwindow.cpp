@@ -16,19 +16,36 @@ MainWindow::MainWindow(QWidget *parent) :
 }
 
 void MainWindow::updateList(QString txt) {
-    qDebug() << txt;
+
+    // valid
     if (!txt.isEmpty()) {
         // check if folder
         QDir dir(txt);
         if (dir.exists()) {
+
+            // set UI
+            ui->lineEdit->setText(txt);
             ui->listWidget->clear();
 
-            QDirIterator iterator(txt);
+            // iterate directory
+            QDirIterator iterator(txt, QDir::Dirs | QDir::Files);
 
             QStringList items;
             while (iterator.hasNext()) {
-                items.append(iterator.next());
+                QString item = iterator.next();
+                if (item.endsWith("/.")) {
+                    continue;
+                }
+
+                QFileInfo fileInfo(item);
+                if (fileInfo.isFile()) {
+                    item = QString("%1 (%2) bytes").arg(item).arg(fileInfo.size());
+                }
+
+                items.append(item);
             }
+
+            // add to UI
             ui->listWidget->addItems(items);
         }
     }
